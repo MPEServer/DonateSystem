@@ -30,7 +30,10 @@ class DBRegistration implements Registration
 
 		if (isset($user)) die('user already registered');
 
-		$db->insert('admins', (array)$user);
+		$db
+			->insert('admins')
+			->values((array)$user)
+			->execute();
 
 		return true;
 	}
