@@ -1,5 +1,7 @@
 <?php
 
+namespace Controllers\Account;
+
 use Service\CustomUserService;
 use Solovey\Routing\Controller;
 
@@ -13,7 +15,7 @@ class LoginController extends Controller
 		$this->userService = new CustomUserService();
 	}
 
-	function page()
+	function index()
 	{
 		if ($this->userService::isAuth()) header('Location: /account');
 

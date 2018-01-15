@@ -33,6 +33,7 @@ class DBRegistration implements Registration
 		$db
 			->insert('admins')
 			->values((array)$user)
+			->transactional()
 			->execute();
 
 		return true;

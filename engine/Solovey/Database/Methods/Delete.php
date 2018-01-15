@@ -3,6 +3,7 @@
 namespace Solovey\Database\Methods;
 
 
+use Exception;
 use Solovey\Database\Database;
 
 class Delete
@@ -11,6 +12,7 @@ class Delete
 	private $query = 'DELETE FROM ';
 	private $data = [];
 	private $separator = ',';
+	private $transactional = false;
 
 	/**
 	 * Delete constructor.
@@ -62,18 +64,37 @@ class Delete
 	}
 
 	/**
+	 * @return $this
+	 */
+	public function transactional()
+	{
+		$this->transactional = true;
+		return $this;
+	}
+
+	/**
 	 * @return \PDOStatement
 	 */
 	public function execute()
 	{
+		$stmt = null;
 
-		Database::$pdo->beginTransaction();
+		if ($this->transactional) {
+			try {
+				Database::$pdo->beginTransaction();
 
-		$stmt = Database::$pdo->prepare($this->query);
+				$stmt = Database::$pdo->prepare($this->query);
+				$stmt->execute($this->data);
 
-		$stmt->execute($this->data);
-
-		Database::$pdo->commit();
+				Database::$pdo->commit();
+			} catch (Exception $e) {
+				Database::$pdo->rollBack();
+				echo $e->getMessage();
+			}
+		} else {
+			$stmt = Database::$pdo->prepare($this->query);
+			$stmt->execute($this->data);
+		}
 
 		return $stmt;
 	}

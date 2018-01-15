@@ -3,6 +3,7 @@
 namespace Solovey\Database\Methods;
 
 
+use Exception;
 use Solovey\Database\Database;
 
 class Select
@@ -11,6 +12,7 @@ class Select
 	private $query = "SELECT ";
 	private $data = [];
 	private $separator = ',';
+	private $transactional = false;
 
 	/**
 	 * Select constructor.
@@ -114,18 +116,37 @@ class Select
 	}
 
 	/**
+	 * @return $this
+	 */
+	public function transactional() {
+		$this->transactional = true;
+		return $this;
+	}
+
+	/**
 	 * @return \PDOStatement
 	 */
 	public function execute()
 	{
 
-		Database::$pdo->beginTransaction();
+		$stmt = null;
 
-		$stmt = Database::$pdo->prepare($this->query);
+		if ($this->transactional) {
+			try {
+				Database::$pdo->beginTransaction();
 
-		$stmt->execute($this->data);
+				$stmt = Database::$pdo->prepare($this->query);
+				$stmt->execute($this->data);
 
-		Database::$pdo->commit();
+				Database::$pdo->commit();
+			} catch (Exception $e) {
+				Database::$pdo->rollBack();
+				echo $e->getMessage();
+			}
+		} else {
+			$stmt = Database::$pdo->prepare($this->query);
+			$stmt->execute($this->data);
+		}
 
 		return $stmt;
 	}

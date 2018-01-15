@@ -137,6 +137,32 @@ function require_all($dir, $depth = 0)
 	}
 }
 
+function require_all_classes($dir, $depth = 0)
+{
+	$scan = glob("$dir/*");
+	foreach ($scan as $path) {
+		if (preg_match('/\.php$/', $path)) {
+			$isGood = false;
+
+			$tokens = token_get_all(file_get_contents($path));
+
+			foreach ($tokens as $token) {
+				if (is_array($token) && token_name($token[0]) == "T_CLASS") {
+					$isGood = true;
+
+					try {
+						require_once($path);
+					} catch (Exception $e) {
+						debug($e);
+					}
+				}
+			}
+		} elseif (is_dir($path)) {
+			require_all_classes($path, $depth + 1);
+		}
+	}
+}
+
 function debug(...$s)
 {
 	echo('<pre>');
@@ -284,6 +310,18 @@ function get_mime_type($filename)
 	}
 }
 
-function unbind($s) {
+function unbind($s)
+{
 	return "solovey_database_unbind($s)";
+}
+
+function startApplication($path = 'app')
+{
+	spl_autoload_register(function ($class) {
+		$path = str_replace('engine', 'app', __DIR__) . '/' . str_replace('\\', '/', $class) . '.php';
+
+		if (is_file($path)) {
+			require $path;
+		}
+	});
 }

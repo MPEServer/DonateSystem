@@ -1,5 +1,7 @@
 <?php
 
+namespace Controllers;
+
 use Service\CustomUserService;
 use Solovey\Routing\Controller;
 
@@ -18,7 +20,8 @@ class HomeController extends Controller
 		$this->render('home');
 	}
 
-	function test() {
+	function test()
+	{
 		$this->render('test');
 	}
 

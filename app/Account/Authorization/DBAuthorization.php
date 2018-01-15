@@ -18,6 +18,7 @@ class DBAuthorization implements Authorization
 	function authorize($username, $password)
 	{
 		$user = CustomUserService::getByUsername($username);
+		debug($user);
 
 		if (isset($user) && $user->password === $password) {
 			return $user;

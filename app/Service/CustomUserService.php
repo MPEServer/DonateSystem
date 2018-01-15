@@ -4,7 +4,6 @@ namespace Service;
 
 use Account\Authorization\DBAuthorization;
 use Model\Admin;
-use Model\User;
 use Solovey\Account\AbstractUser;
 use Solovey\Service\DatabaseService;
 use Solovey\Service\I\UserService;
@@ -70,8 +69,6 @@ class CustomUserService extends DatabaseService implements UserService
 			->where(['username =' => $username])
 			->execute()
 			->fetchAll();
-
-		debug($stmt);
 
 		foreach ($stmt as $item => $value) {
 			return arrayToObject($value, Admin::class);

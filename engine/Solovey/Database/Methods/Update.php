@@ -3,6 +3,7 @@
 namespace Solovey\Database\Methods;
 
 
+use Exception;
 use Solovey\Database\Database;
 
 class Update
@@ -11,6 +12,7 @@ class Update
 	private $query = 'UPDATE ';
 	private $data = [];
 	private $separator = ',';
+	private $transactional = false;
 
 	/**
 	 * Update constructor.
@@ -87,18 +89,36 @@ class Update
 	}
 
 	/**
+	 * @return $this
+	 */
+	public function transactional() {
+		$this->transactional = true;
+		return $this;
+	}
+
+	/**
 	 * @return \PDOStatement
 	 */
 	public function execute()
 	{
+		$stmt = null;
 
-		Database::$pdo->beginTransaction();
+		if ($this->transactional) {
+			try {
+				Database::$pdo->beginTransaction();
 
-		$stmt = Database::$pdo->prepare($this->query);
+				$stmt = Database::$pdo->prepare($this->query);
+				$stmt->execute($this->data);
 
-		$stmt->execute($this->data);
-
-		Database::$pdo->commit();
+				Database::$pdo->commit();
+			} catch (Exception $e) {
+				Database::$pdo->rollBack();
+				echo $e->getMessage();
+			}
+		} else {
+			$stmt = Database::$pdo->prepare($this->query);
+			$stmt->execute($this->data);
+		}
 
 		return $stmt;
 	}

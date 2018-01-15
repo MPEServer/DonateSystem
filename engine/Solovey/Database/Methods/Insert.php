@@ -3,6 +3,7 @@
 namespace Solovey\Database\Methods;
 
 
+use Exception;
 use Solovey\Database\Database;
 
 class Insert
@@ -10,6 +11,7 @@ class Insert
 
 	private $query = 'INSERT INTO ';
 	private $data = [];
+	private $transactional = false;
 
 	/**
 	 * Insert constructor.
@@ -59,18 +61,38 @@ class Insert
 	}
 
 	/**
+	 * @return $this
+	 */
+	public function transactional()
+	{
+		$this->transactional = true;
+		return $this;
+	}
+
+	/**
 	 * @return \PDOStatement
 	 */
 	public function execute()
 	{
 
-		Database::$pdo->beginTransaction();
+		$stmt = null;
 
-		$stmt = Database::$pdo->prepare($this->query);
+		if ($this->transactional) {
+			try {
+				Database::$pdo->beginTransaction();
 
-		$stmt->execute($this->data);
+				$stmt = Database::$pdo->prepare($this->query);
+				$stmt->execute($this->data);
 
-		Database::$pdo->commit();
+				Database::$pdo->commit();
+			} catch (Exception $e) {
+				Database::$pdo->rollBack();
+				echo $e->getMessage();
+			}
+		} else {
+			$stmt = Database::$pdo->prepare($this->query);
+			$stmt->execute($this->data);
+		}
 
 		return $stmt;
 	}
