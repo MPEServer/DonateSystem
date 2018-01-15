@@ -137,32 +137,6 @@ function require_all($dir, $depth = 0)
 	}
 }
 
-function require_all_classes($dir, $depth = 0)
-{
-	$scan = glob("$dir/*");
-	foreach ($scan as $path) {
-		if (preg_match('/\.php$/', $path)) {
-			$isGood = false;
-
-			$tokens = token_get_all(file_get_contents($path));
-
-			foreach ($tokens as $token) {
-				if (is_array($token) && token_name($token[0]) == "T_CLASS") {
-					$isGood = true;
-
-					try {
-						require_once($path);
-					} catch (Exception $e) {
-						debug($e);
-					}
-				}
-			}
-		} elseif (is_dir($path)) {
-			require_all_classes($path, $depth + 1);
-		}
-	}
-}
-
 function debug(...$s)
 {
 	echo('<pre>');
@@ -170,13 +144,6 @@ function debug(...$s)
 		var_dump($item);
 	}
 	echo('</pre>');
-}
-
-function connect_controller(...$c)
-{
-	foreach ($c as $item) {
-		require $_SERVER['DOCUMENT_ROOT'] . '/app/Controllers/' . $item . '.php';
-	}
 }
 
 function objectToObject($instance, $className)
@@ -315,10 +282,10 @@ function unbind($s)
 	return "solovey_database_unbind($s)";
 }
 
-function startApplication($path = 'app')
+function startApplication($app = 'app')
 {
-	spl_autoload_register(function ($class) {
-		$path = str_replace('engine', 'app', __DIR__) . '/' . str_replace('\\', '/', $class) . '.php';
+	spl_autoload_register(function ($class) use ($app) {
+		$path = str_replace('engine', $app, __DIR__) . '/' . str_replace('\\', '/', $class) . '.php';
 
 		if (is_file($path)) {
 			require $path;

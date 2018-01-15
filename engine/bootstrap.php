@@ -51,6 +51,7 @@ if (startsWith($_SERVER['REQUEST_URI'], '/app/') ||
 $route = Router::match($_SERVER['REQUEST_URI'], GET_METHOD());
 
 if (!($route)) {
+	header("HTTP/1.1 404 Not Found");
 	if (is_file($_SERVER['DOCUMENT_ROOT'] . '/pages/404.php')) {
 		require $_SERVER['DOCUMENT_ROOT'] . '/pages/404.php';
 	} else {

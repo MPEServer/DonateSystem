@@ -7,7 +7,7 @@ require 'helpers/_head.php' ?>
 
 	<div load>
 
-		popop
+		xxx
 
 	</div>
 

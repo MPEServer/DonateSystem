@@ -86,12 +86,4 @@ class Database
 	{
 		return new Delete($from);
 	}
-
-	/**
-	 * @return PDO
-	 */
-	function getPdo()
-	{
-		return self::$pdo;
-	}
 }
